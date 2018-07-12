@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta Keywords="少女前线 人形建造 大建" content="string">
+    <meta description="少女前线大建模拟器" content="string">
+    <meta author="tomatoyuyuko" content="string">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>IOP开心枪厂</title>
+    <link href="https://cdn.bootcss.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css">
+    <script src="https://cdn.bootcss.com/vue/2.5.16/vue.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <style>
+        html{position:relative;overflow-x:hidden;overflow-y:auto;margin:0;min-height:100%;}
+        body{min-height:100%;}
+        #app .side{display:flex;background:#f0f0f0;justify-content:center;}
+        #app .main .left form{margin:0 auto;width:100%;height:100%;background:#d8d8d8;}
+        #app .main .table{overflow:auto;height:auto;}
+        #app .main .option{height:auto;}
+        #app .main .radius-head{border-top-right-radius:0;border-bottom-right-radius:0;}
+        #app .main .radius-center{border-radius:0;}
+        #app .main .radius-tail{border-bottom-left-radius:0;border-top-left-radius:0;}
+        #app .main .right .hb .activenormal{border-color:#17a2b8;background-color:#17a2b8;color:#fff;}
+        #app .main .right .hb .activeheavy{border-color:#ffc107;background-color:#ffc107;color:#212529;}
+        #rank{width:100%;height:100%;}
+        #state{width:100%;height:auto;}
+    </style>
+</head>
+<body>
+<div class="row" id="app">
+    <div class="col-sm-2 col-md-2 side"></div>
+    <div class="col-sm-8 col-md-8 main" style="margin-top: 10px">
+        <div class="container" style="margin-left: 0;padding-left: 0;margin-bottom: 1px">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">人形制造</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">装备制造（待完成）</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">妖精制造（待完成）</a>
+                </li>
+            </ul>
+        </div>
+        <div class="row info">
+            <div class="col-sm-6 col-md-6 left">
+                <form style="overflow: hidden">
+                    <div class="form-group row">
+                        <div class="col-sm-5 col-md-5 offset-md-1 offset-sm-1">
+                            <label for="p">人力</label>
+                            <input type="text" class="form-control" id="p" v-model="p" :maxlength="limit">
+                        </div>
+                        <div class="col-sm-5 col-md-5">
+                            <label for="a">弹药</label>
+                            <input type="text" class="form-control" id="a" v-model="a" :maxlength="limit">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-5 col-md-5 offset-md-1 offset-sm-1">
+                            <label for="r">口粮</label>
+                            <input type="text" class="form-control" id="r" v-model="r" :maxlength="limit">
+                        </div>
+                        <div class="col-sm-5 col-md-5">
+                            <label for="s">零件</label>
+                            <input type="text" class="form-control" id="s" v-model="s" :maxlength="limit">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div id="rank" :class="cardClass">
+                            <div class="card-body mx-auto">{{nowg}}{{nows}}</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-sm-6 col-md-6 right">
+                <div style="height: 45%;margin-bottom: 1em" class="d-flex">
+                    <div id="state" class="card flex-fill" style="padding-left: 0;padding-right: 0">
+                        <div class="card-header">统计数据-总计建造：{{stateTotal}}</div>
+                        <div class="card-body" style="padding: 0;">
+                            <div>其中5星：{{state5}}个，4星：{{state4}}个，3星{{state3}}个，2星{{state2}}个</div>
+                            <div style="margin-bottom: 1em">出货率为：{{stateAva}}%，血统鉴定为{{stateMark}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="option d-flex hb" style="margin-bottom: 1em">
+                    <button id="bn" type="button"
+                            :class="['activenormal','btn','btn-outline-info','flex-fill','radius-head']"
+                            @click="normal">
+                        普通建造
+                    </button>
+                    <button id="bh1" type="button"
+                            :class="['bh','btn','btn-outline-warning','flex-fill','radius-center']"
+                            @clicK="heavyBuild(1)">重建一档
+                    </button>
+                    <button id="bh2" type="button"
+                            :class="['bh','btn','btn-outline-warning','flex-fill','radius-center']"
+                            @click="heavyBuild(2)">重建二档
+                    </button>
+                    <button id="bh3" type="button" :class="['bh','btn','btn-outline-warning','flex-fill','radius-tail']"
+                            @click="heavyBuild(3)">重建三档
+                    </button>
+                </div>
+                <div class="option">
+                    <div class="d-flex">
+                        <button type="button" @click="submit" class="btn btn-primary radius-head" style="width: 50%;">
+                            给老子造!
+                        </button>
+                        <!-- <button type="button" @click="reset" class="btn btn-warning radius-center"
+                                 style="width: 25%;border-radius: 0;">归零
+                         </button>-->
+                        <button type="button" @click="del" class="btn btn-danger radius-tail"
+                                style="width: 50%;border-bottom-left-radius: 0;border-top-left-radius: 0;">怒删游戏
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>类别</th>
+                    <th>星级</th>
+                </tr>
+                </thead>
+                <tbody id="tb" style="height: 100%;overflow: auto">
+                <tr v-bind:class="item.rankClass" v-for="(item, index) in displayList">
+                    <td>{{item.name}}</td>
+                    <td>{{item.typeName}}</td>
+                    <td>{{item.star}}</td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    <div class="col-sm-2 col-md-2 side"></div>
+</div>
+<script>
+    var app = new Vue({
+        data: function () {
+            return {
+                activenormal: true,
+                activeheavy: false,
+                test: true,
+                limit: '3',
+                buildingType: '0',
+                p: "30",
+                a: "30",
+                r: "30",
+                s: "30",
+                total: 0,
+                stateTotal: 0,
+                state5: 0,
+                state4: 0,
+                state3: 0,
+                state2: 0,
+                stateAva: 0,
+                stateMark: "",
+                thisId: "",
+                nowg: "窑子前线群内部使用，仅供学习娱乐（绝对没有空的~！）",
+                nows: "",
+                cardClass: "card bg-light text-dark",
+                rank: "card bg-primary text-white",
+                gunList: [],
+                displayList: [],
+                thisData: [],
+            }
+        },
+        mounted: function () {
+            var list = this.gunList;
+            $.get("https://ipick.baka.pw/data/json/gun_info_simple", function (data) {
+                var temp = {};
+                $.each(data, function (index, item) {
+                    temp = {"id": item.id, "name": item.cn_name, "type": item.type, "rank": item.rank};
+                    list.push(temp);
+                })
+            })
+        },
+        methods: {
+            rndNum: function (n) {
+                var num = Math.random();
+                num = Math.ceil(num * n);
+                var str;
+                if (num < 10) {
+                    str = "0" + num
+                } else {
+                    str = num.toString();
+                }
+                return str;
+            },
+            displayBroad: function (item) {
+                var star = item.star;
+                var name = item.name;
+                var thisClass = "card";
+                this.nows = star;
+                this.nowg = name;
+                if (item.rank == 2) {
+                    thisClass = 'card bg-secondary text-white'
+                } else if (item.rank == 3) {
+                    thisClass = 'card bg-info text-white'
+                } else if (item.rank == 4) {
+                    thisClass = 'card bg-success text-white'
+                } else if (item.rank == 5) {
+                    thisClass = 'card bg-warning text-white'
+                }
+                this.cardClass = thisClass;
+            },
+            option: function (ranNum) {
+                var last = {};
+                $.each(this.thisData, function (index, item) {
+                    if (item.range > ranNum) {
+                        app.compare(item.gun_id);
+                        return false
+                    } else {
+                        last = item;
+                    }
+                })
+            },
+            submit: function () {
+                var reg = /^[0-9]+$/;
+                var min = 0;
+                if (this.buildingType == 0) {
+                    min = 30
+                } else if (this.buildingType > 0) {
+                    min = 1000
+                }
+                if (!reg.test(this.p) || (this.p) < min) {
+                    alert("请输入正确人力")
+                    return false;
+                }
+                if (!reg.test(this.a) || (this.a) < min) {
+                    alert("请输入正确弹药")
+                    return false;
+                }
+                if (!reg.test(this.r) || (this.r) < min) {
+                    alert("请输入正确口粮")
+                    return false;
+                }
+                if (!reg.test(this.s) || (this.s) < min) {
+                    alert("请输入正确零件")
+                    return false;
+                }
+                $.get("https://ipick.baka.pw/stats/tdoll/formula/" + this.p + ":" + this.a + ":" + this.r + ":" + this.s + ":" + this.buildingType, function (data) {
+                    var temp = 0;
+                    var res = JSON.parse(data);
+                    var ranNum = 0;
+                    app.total = res.total;
+                    app.thisData = res.data;
+                    if (app.total != 0) {
+                        $.each(app.thisData, function (index, item) {
+                            item.range = item.count + temp;
+                            temp = item.range;
+                        });
+                        ranNum = app.rndNum(app.total);
+                        app.option(ranNum);
+                    } else {
+                        app.nowg = "找不到这个公式的记录哎"
+                        app.nows = ""
+                    }
+                })
+            },
+            reset: function () {
+                if (this.buildingType == 0) {
+                    this.p = "30";
+                    this.a = "30";
+                    this.r = "30";
+                    this.s = "30";
+                    this.nowg = "窑子前线群内部使用，仅供学习娱乐（绝对没有空的~！）";
+                    app.nows = ""
+                } else {
+                    this.p = "1000";
+                    this.a = "1000";
+                    this.r = "1000";
+                    this.s = "1000";
+                    this.nowg = "窑子前线群内部使用，仅供学习娱乐（绝对没有空的~！）";
+                    app.nows = ""
+                }
+            },
+            del: function () {
+                this.displayList = [];
+                this.total = 0;
+                this.stateTotal = 0;
+                this.state5 = 0;
+                this.state4 = 0;
+                this.state3 = 0;
+                this.state2 = 0;
+                this.stateAva = 0;
+                this.stateMark = "";
+                app.reset()
+            },
+            normal: function () {
+                this.buildingType = 0;
+                this.limit = 3;
+                if (!$('#bn').hasClass("activenormal")) {
+                    $('.bh').removeClass("activeheavy");
+                    $('#bn').addClass("activenormal");
+                    app.reset()
+                }
+            },
+            heavyBuild: function (n) {
+                this.buildingType = n;
+                this.limit = 4;
+                $('.bh').removeClass("activeheavy");
+                $('#bn').removeClass("activenormal");
+                $('#bh' + n).addClass("activeheavy");
+                app.reset();
+            },
+            compare: function (id) {
+                var self = app;
+                $.each(self.gunList, function (index, item) {
+                        if (id == item.id) {
+                            self.stateTotal += 1;
+                            //星级
+                            if (item.rank == '2') {
+                                self.state2 += 1;
+                                item.rankClass = 'table-secondary';
+                                item.star = '★★';
+                            } else if (item.rank == '3') {
+                                self.state3 += 1;
+                                item.rankClass = 'table-info'
+                                item.star = '★★★';
+                            } else if (item.rank == '4') {
+                                self.state4 += 1;
+                                item.rankClass = 'table-success'
+                                item.star = '★★★★';
+                            } else if (item.rank == '5') {
+                                self.state5 += 1;
+                                item.rankClass = 'table-warning'
+                                item.star = '★★★★★';
+                            }
+                            self.stateAva = ((self.state5 / self.stateTotal).toFixed(2)) * 100;
+                            //种类
+                            if (item.type == '1') {
+                                item.typeName = 'HG'
+                            } else if (item.type == '2') {
+                                item.typeName = 'SMG'
+                            } else if (item.type == '3') {
+                                item.typeName = 'RF'
+                            } else if (item.type == '4') {
+                                item.typeName = 'AR'
+                            } else if (item.type == '5') {
+                                item.typeName = 'MG'
+                            } else {
+                                item.typeName = 'SG'
+                            }
+                            //鉴定
+                            if (self.stateAva == 0 && self.stateTotal < 4) {
+                                self.stateMark = '普通少前玩家'
+                            } else if (self.stateAva == 0 && self.stateTotal > 20) {
+                                self.stateMark = '草原之王'
+                            } else if (self.stateAva != 0 && self.stateTotal < 4) {
+                                self.stateMark = '欧洲狗'
+                            } else if (self.stateAva != 0 && self.stateAva < 2 && self.stateTotal >= 4) {
+                                self.stateMark = '立派非洲人'
+                            } else if (self.stateAva >= 2 && self.stateAva < 4 && self.stateTotal >= 4) {
+                                self.stateMark = '偷渡非洲人'
+                            } else if (self.stateAva >= 4 && self.stateAva < 6 && self.stateTotal >= 4) {
+                                self.stateMark = '欧洲难民'
+                            } else if (self.stateAva >= 6 && self.stateAva < 10 && self.stateTotal >= 4) {
+                                self.stateMark = '欧洲人'
+                            } else if (self.stateAva >= 10 && self.stateAva < 20 && self.stateTotal >= 4) {
+                                self.stateMark = '欧洲海豹'
+                            } else if (self.stateAva >= 20 && self.stateTotal >= 4) {
+                                self.stateMark = '欧洲海豹王'
+                            }
+                            app.displayBroad(item);
+                            app.displayList.push(item);
+                            return false
+                        }
+                    }
+                )
+
+            }
+        }
+    }).$mount('#app')
+</script>
+</body>
+</html>
