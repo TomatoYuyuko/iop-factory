@@ -174,7 +174,7 @@
         },
         mounted: function () {
             var list = this.gunList;
-            $.get("https://ipick.baka.pw/data/json/gun_info_simple", function (data) {
+            $.get("https://ipick.baka.pw:444/data/json/gun_info_simple", function (data) {
                 var temp = {};
                 $.each(data, function (index, item) {
                     temp = {"id": item.id, "name": item.cn_name, "type": item.type, "rank": item.rank};
@@ -246,7 +246,7 @@
                     alert("请输入正确零件")
                     return false;
                 }
-                $.get("https://ipick.baka.pw/stats/tdoll/formula/" + this.p + ":" + this.a + ":" + this.r + ":" + this.s + ":" + this.buildingType, function (data) {
+                $.get("https://ipick.baka.pw:444/stats/tdoll/formula/" + this.p + ":" + this.a + ":" + this.r + ":" + this.s + ":" + this.buildingType, function (data) {
                     var temp = 0;
                     var res = JSON.parse(data);
                     var ranNum = 0;
