@@ -16,7 +16,7 @@
                                  label="Ammo"></el-input-number>
             </el-col>
             <el-col :span="4" :offset="2">
-                <el-button>Do it!</el-button>
+                <el-button @click="building()">Do it!</el-button>
             </el-col>
         </el-row>
         <el-row>
@@ -35,6 +35,34 @@
                                  label="Parts"></el-input-number>
             </el-col>
         </el-row>
+        <el-row>
+            <el-col :span="24">
+                <el-table
+                        :data="logDate"
+                        style="width: 100%"
+                        :row-class-name="tableRowClassName">
+                    <el-table-column
+                            prop="rank"
+                            label="星级"
+                            width="180">
+                    </el-table-column>
+                    <el-table-column
+                            prop="type"
+                            label="种类"
+                            width="180">
+                    </el-table-column>
+                    <el-table-column
+                            prop="name"
+                            label="名称">
+                    </el-table-column>
+                    <el-table-column
+                            prop="formula"
+                            label="公式">
+                    </el-table-column>
+                </el-table>
+            </el-col>
+        </el-row>
+
     </div>
 </template>
 
@@ -47,8 +75,8 @@
                 resource: {
                     manpower: 30,
                     ammo: 30,
-                    ration:30,
-                    parts:30,
+                    ration: 30,
+                    parts: 30,
                 },
                 equip_info: [
                     {
@@ -5801,15 +5829,44 @@
                         "skill": "0",
                         "max_level": "10",
                         "cn_name": "\u9ad8\u6027\u80fd\u6218\u672f\u53d1\u9970"
-                    }]
+                    }],
+                logDate: [{
+                    rank: '5',
+                    type: 'SG',
+                    name: 'aa12',
+                    formula: ''
+                }]
             }
         },
         components: {},
         methods: {
-             handleChange(value) {
+            handleChange(value) {
                 // eslint-disable-next-line
-                 console.log(value);
-             }
+                console.log(value);
+            },
+            // eslint-disable-next-line
+            tableRowClassName({row, rowIndex}) {
+                if (rowIndex === 1) {
+                    return 'warning-row';
+                } else if (rowIndex === 3) {
+                    return 'success-row';
+                }
+                return '';
+            },
+            building() {
+                let entity = this;
+                let resource = entity.resource.manpower + ':' + entity.resource.ammo + ':' + entity.resource.ration + ':' + entity.resource.parts + ':0';
+                this.axios({
+                    method: 'get',
+                    url: 'https://db.baka.pw:444/stats/equip/formula/' + resource
+                })
+                .then(function (response) {
+                    console.log(response.total)
+                })
+                .catch(function (error) {
+                    console.log(error)
+                });
+            }
         }
     }
 </script>
@@ -5828,5 +5885,13 @@
         margin-right: 10px;
         margin-top: 5px;
         font-size: 1.2em;
+    }
+
+    .el-table .warning-row {
+        background: oldlace;
+    }
+
+    .el-table .success-row {
+        background: #f0f9eb;
     }
 </style>

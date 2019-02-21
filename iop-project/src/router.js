@@ -26,7 +26,7 @@ let p = navigator.platform;
 system.win = p.indexOf("Win") === 0;
 system.mac = p.indexOf("Mac") === 0;
 system.x11 = (p === "X11") || (p.indexOf("Linux") === 0);
-//跳转语句
+//切换路由
 if (system.win || system.mac || system.xll) {
     routes = routesForPC
 } else {
