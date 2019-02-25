@@ -6877,8 +6877,6 @@
                         if (sum > random) {
                             equipId = Number(item.equip_id);
                             fairyId = Number(item.fairy_id);
-                            console.log(equipId);
-                            console.log(fairyId);
                             finish = true
                         }
                     });
@@ -6891,7 +6889,6 @@
                     }
 
                 }).then(function (info) {
-                    console.log(info);
                     let item;
                     if (info.type === 'none') {
                         item = {
@@ -6917,7 +6914,6 @@
                             }
                             type = target.code.split('_')[1];
                         }
-                        console.log(target);
                         item = {
                             rank: stars,
                             type: type,
