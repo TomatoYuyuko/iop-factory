@@ -29,6 +29,7 @@ system.x11 = (p === "X11") || (p.indexOf("Linux") === 0);
 //切换路由
 if (system.win || system.mac || system.xll) {
     routes = routesForPC
+    //routes = routesForM
 } else {
     routes = routesForM
 }

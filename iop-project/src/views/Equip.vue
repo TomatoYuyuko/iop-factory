@@ -1,5 +1,5 @@
 <template>
-    <div class="equip">
+    <div class="equip" v-loading="loading">
         <el-row>
             <el-col :span="4">
                 <label class="label">Manpower:</label>
@@ -67,11 +67,14 @@
 </template>
 
 <script>
+    import axios from 'axios'
+
     // @ is an alias to /src
     export default {
         name: 'equip',
         data() {
             return {
+                loading: false,
                 resource: {
                     manpower: 30,
                     ammo: 30,
@@ -5855,16 +5858,45 @@
             },
             building() {
                 let entity = this;
+                entity.loading = true;
                 let resource = entity.resource.manpower + ':' + entity.resource.ammo + ':' + entity.resource.ration + ':' + entity.resource.parts + ':0';
-                this.axios({
+                let total = 0;
+                let allRes = [];
+                axios({
                     method: 'get',
                     url: 'https://db.baka.pw:444/stats/equip/formula/' + resource
                 })
                 .then(function (response) {
-                    console.log(response.total)
+                    let data = response.data;
+                    total = data.total;
+                    allRes = data.data;
+                    let random = Math.floor(Math.random() * total);
+                    let sum = 0;
+                    let equipId = 0;
+                    let finish = false;
+                    allRes.forEach(function (item) {
+                        if (finish) {
+                            return false
+                        }
+                        sum += item.count;
+                        if (sum > random) {
+                            equipId = item.equip_id;
+                            finish = true
+                        }
+                    });
+                    return equipId
+                }).then(function (id) {
+                    let target = entity.equip_info.find(function (x) {
+                        return Number(x.id) === id;
+                    });
+                    // eslint-disable-next-line
+                    console.log(target);
+                    entity.loading = false;
                 })
                 .catch(function (error) {
-                    console.log(error)
+                    // eslint-disable-next-line
+                    console.warn(error);
+                    entity.loading = false;
                 });
             }
         }
