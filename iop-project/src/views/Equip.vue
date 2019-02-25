@@ -5,14 +5,14 @@
                 <label class="label">Manpower:</label>
             </el-col>
             <el-col :span="4">
-                <el-input-number v-model="resource.manpower" @change="handleChange" :min="30" :max="999"
+                <el-input-number v-model="resource.manpower" @change="handleChange" :min="30" :max="300"
                                  label="manpower"></el-input-number>
             </el-col>
             <el-col :span="4">
                 <label class="label">Ammo:</label>
             </el-col>
             <el-col :span="4">
-                <el-input-number v-model="resource.ammo" @change="handleChange" :min="30" :max="999"
+                <el-input-number v-model="resource.ammo" @change="handleChange" :min="30" :max="300"
                                  label="Ammo"></el-input-number>
             </el-col>
             <el-col :span="4" :offset="2">
@@ -24,14 +24,14 @@
                 <label class="label">Ration:</label>
             </el-col>
             <el-col :span="4">
-                <el-input-number v-model="resource.ration" @change="handleChange" :min="30" :max="999"
+                <el-input-number v-model="resource.ration" @change="handleChange" :min="30" :max="300"
                                  label="Ration"></el-input-number>
             </el-col>
             <el-col :span="4">
                 <label class="label">Parts:</label>
             </el-col>
             <el-col :span="4">
-                <el-input-number v-model="resource.parts" @change="handleChange" :min="30" :max="999"
+                <el-input-number v-model="resource.parts" @change="handleChange" :min="30" :max="300"
                                  label="Parts"></el-input-number>
             </el-col>
         </el-row>
@@ -5833,12 +5833,7 @@
                         "max_level": "10",
                         "cn_name": "\u9ad8\u6027\u80fd\u6218\u672f\u53d1\u9970"
                     }],
-                logDate: [{
-                    rank: '5',
-                    type: 'SG',
-                    name: 'aa12',
-                    formula: ''
-                }]
+                logDate: []
             }
         },
         components: {},
@@ -5859,6 +5854,22 @@
             building() {
                 let entity = this;
                 entity.loading = true;
+                if (entity.resource.manpower > 300) {
+                    this.$message.error('错了哦，人力上线不可以大于300');
+                    return false
+                }
+                if (entity.resource.ammo > 300) {
+                    this.$message.error('错了哦，弹药上线不可以大于300');
+                    return false
+                }
+                if (entity.resource.ration > 300) {
+                    this.$message.error('错了哦，口粮上线不可以大于300');
+                    return false
+                }
+                if (entity.resource.parts > 300) {
+                    this.$message.error('错了哦，零件上线不可以大于300');
+                    return false
+                }
                 let resource = entity.resource.manpower + ':' + entity.resource.ammo + ':' + entity.resource.ration + ':' + entity.resource.parts + ':0';
                 let total = 0;
                 let allRes = [];
@@ -5880,17 +5891,40 @@
                         }
                         sum += item.count;
                         if (sum > random) {
-                            equipId = item.equip_id;
+                            equipId = item.equip_id || item.fairy_id;
                             finish = true
                         }
                     });
+                    if (total === 0) {
+                        equipId = 999;
+                    }
                     return equipId
                 }).then(function (id) {
-                    let target = entity.equip_info.find(function (x) {
-                        return Number(x.id) === id;
-                    });
-                    // eslint-disable-next-line
-                    console.log(target);
+                    let item;
+                    console.log(id);
+                    if (id === 999) {
+                        item = {
+                            rank: '————',
+                            type: '————',
+                            name: '无记录',
+                            formula: resource
+                        };
+                    } else {
+                        let target = entity.equip_info.find(function (x) {
+                            return Number(x.id) === id;
+                        });
+                        let stars = '';
+                        for (let i = 0; i < target.rank || 0; i++) {
+                            stars += '★'
+                        }
+                        item = {
+                            rank: stars,
+                            type: target.code.split('_')[1],
+                            name: target.cn_name,
+                            formula: resource
+                        };
+                    }
+                    entity.logDate.push(item);
                     entity.loading = false;
                 })
                 .catch(function (error) {

@@ -10,6 +10,7 @@
             <mt-field label="Parts:" placeholder="请输入零件" type="number"
                       v-model="resource.parts"></mt-field>
         </div>
+        <div>移动端开发中，请转至pc端</div>
     </div>
 </template>
 
